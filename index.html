@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0" />
+    <meta name="theme-color" content="#4A1133" />
+    <title>Sabor do Açaí & Sorveteria</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Fredoka+One&family=Nunito:wght@400;600;700;800;900&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+      body {
+        background-color: #3D0A29;
+        font-family: 'Nunito', sans-serif;
+        -webkit-font-smoothing: antialiased;
+        -moz-osx-font-smoothing: grayscale;
+        min-height: 100vh;
+        overscroll-behavior: none;
+      }
+
+      input, button, select, textarea {
+        font-family: 'Nunito', sans-serif;
+      }
+
+      /* ── Animações ── */
+      @keyframes fadeSlideUp {
+        from { opacity: 0; transform: translateY(16px); }
+        to   { opacity: 1; transform: translateY(0); }
+      }
+      @keyframes fadeIn {
+        from { opacity: 0; }
+        to   { opacity: 1; }
+      }
+      @keyframes slideUp {
+        from { opacity: 0; transform: translateY(40px); }
+        to   { opacity: 1; transform: translateY(0); }
+      }
+      @keyframes popIn {
+        from { opacity: 0; transform: scale(0.94); }
+        to   { opacity: 1; transform: scale(1); }
+      }
+      @keyframes cartBounce {
+        0%,100% { transform: scale(1); }
+        50%      { transform: scale(1.18); }
+      }
+
+      .page-enter  { animation: fadeSlideUp 0.28s ease-out both; }
+      .overlay-enter { animation: fadeIn 0.2s ease-out both; }
+      .sheet-enter { animation: slideUp 0.3s cubic-bezier(0.32,0.72,0,1) both; }
+      .pop-enter   { animation: popIn 0.22s ease-out both; }
+      .cart-bounce { animation: cartBounce 0.35s ease-out; }
+
+      /* ── Scrollbars ── */
+      ::-webkit-scrollbar       { width: 4px; height: 4px; }
+      ::-webkit-scrollbar-track { background: transparent; }
+      ::-webkit-scrollbar-thumb { background: rgba(245,192,0,.35); border-radius: 2px; }
+
+      /* Tab nav: ocultar scrollbar horizontal */
+      .tab-scroll::-webkit-scrollbar { height: 0; width: 0; }
+      .tab-scroll { scrollbar-width: none; -ms-overflow-style: none; }
+
+      /* Input placeholder color */
+      ::placeholder { color: rgba(255,255,255,0.3); }
+
+      /* Input focus outline */
+      input:focus { outline: none; }
+    </style>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.jsx"></script>
+  </body>
+</html>
