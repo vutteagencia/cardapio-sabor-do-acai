@@ -213,21 +213,32 @@ function Header({ cartQty, cartTotal, onCartClick }) {
 }
 
 // ============================================================
-//  COMPONENTE: TAB NAVIGATION
+//  ORDEM DO SCROLL ÚNICO
 // ============================================================
-function TabNav({ sections, active, setActive }) {
-  const scrollRef  = useRef(null);
-  const activeRef  = useRef(null);
+const SCROLL_ORDER = ['combos-250', 'combos-500', 'combos-1kg', 'monte-seu', 'milkshakes', 'outros'];
+
+// ============================================================
+//  COMPONENTE: BARRA DE NAVEGAÇÃO POR SEÇÃO (ATALHOS)
+// ============================================================
+function SectionNavBar({ activeId }) {
+  const activeRef = useRef(null);
+  const sections  = SCROLL_ORDER
+    .map(id => MENU_SECTIONS.find(s => s.id === id))
+    .filter(Boolean);
 
   useEffect(() => {
-    if (activeRef.current && scrollRef.current) {
-      activeRef.current.scrollIntoView({ behavior: 'smooth', inline: 'center', block: 'nearest' });
-    }
-  }, [active]);
+    activeRef.current?.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
+  }, [activeId]);
+
+  const handleClick = (id) => {
+    const el = document.getElementById(`section-${id}`);
+    if (!el) return;
+    const y = el.getBoundingClientRect().top + window.scrollY - 120;
+    window.scrollTo({ top: y, behavior: 'smooth' });
+  };
 
   return (
     <div
-      ref={scrollRef}
       className="tab-scroll"
       style={{
         display: 'flex', overflowX: 'auto',
@@ -235,16 +246,16 @@ function TabNav({ sections, active, setActive }) {
         padding: '8px 12px 10px',
         gap: 8,
         borderBottom: `1px solid ${C.glassBorder}`,
-        position: 'sticky', top: 72, zIndex: 90,
+        position: 'sticky', top: 64, zIndex: 90,
       }}
     >
       {sections.map(s => {
-        const isActive = s.id === active;
+        const isActive = s.id === activeId;
         return (
           <button
             key={s.id}
             ref={isActive ? activeRef : null}
-            onClick={() => setActive(s.id)}
+            onClick={() => handleClick(s.id)}
             style={{
               flexShrink: 0,
               backgroundColor: isActive ? C.accent : 'transparent',
@@ -973,37 +984,90 @@ function MonteSeuSection({ section, onAdd, cartHasItems }) {
 }
 
 // ============================================================
-//  PÁGINA: CARDÁPIO
+//  PÁGINA: CARDÁPIO (scroll único)
 // ============================================================
 function MenuPage({ cart, onAdd, onGoToCart }) {
-  const [active,   setActive]   = useState('acai-kg');
-  const [selected, setSelected] = useState(null);
+  const [activeId,  setActiveId]  = useState(SCROLL_ORDER[0]);
+  const [selected,  setSelected]  = useState(null);
 
   const cartQty   = cart.reduce((s, i) => s + i.qty, 0);
   const cartTotal = cart.reduce((s, i) => s + i.product.price * i.qty, 0);
-  const section   = MENU_SECTIONS.find(s => s.id === active);
+
+  const orderedSections = SCROLL_ORDER
+    .map(id => MENU_SECTIONS.find(s => s.id === id))
+    .filter(Boolean);
+
+  // Atualiza o atalho ativo conforme o scroll
+  useEffect(() => {
+    const observers = SCROLL_ORDER.map(id => {
+      const el = document.getElementById(`section-${id}`);
+      if (!el) return null;
+      const obs = new IntersectionObserver(
+        ([entry]) => { if (entry.isIntersecting) setActiveId(id); },
+        { rootMargin: '-20% 0px -70% 0px' }
+      );
+      obs.observe(el);
+      return obs;
+    }).filter(Boolean);
+    return () => observers.forEach(o => o.disconnect());
+  }, []);
 
   return (
     <div>
-      <TabNav sections={MENU_SECTIONS} active={active} setActive={setActive} />
+      <SectionNavBar activeId={activeId} />
 
-      <div style={{ maxWidth: 600, margin: '0 auto', paddingBottom: 110 }}>
-        {section?.type === 'regular' && (
-          <div className="page-enter" style={{ padding: '14px 14px 0', display: 'flex', flexDirection: 'column', gap: 10 }}>
-            {section.products.map(p => (
-              <ProductCard key={p.id} product={p} onSelect={setSelected} />
-            ))}
-          </div>
-        )}
-        {section?.type === 'coming-soon' && <ComingSoonSection section={section} />}
-        {section?.type === 'info'         && <InfoSection section={section} />}
-        {section?.type === 'monte'        && (
-          <MonteSeuSection
-            section={section}
-            onAdd={onAdd}
-            cartHasItems={cartQty > 0}
-          />
-        )}
+      <div style={{ maxWidth: 600, margin: '0 auto', paddingBottom: cartQty > 0 ? 100 : 40 }}>
+        {orderedSections.map(section => {
+          const isMonte = section.type === 'monte';
+          return (
+            <div
+              key={section.id}
+              id={`section-${section.id}`}
+              style={isMonte ? {
+                background: `linear-gradient(to bottom, ${C.accent}0A, ${C.accent}03)`,
+                borderTop: `1px solid ${C.accent}35`,
+                borderBottom: `1px solid ${C.accent}35`,
+                marginTop: 4,
+              } : {}}
+            >
+              {/* Título da seção */}
+              <div style={{ padding: '22px 16px 10px' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                  <span style={{ fontSize: 22 }}>{section.emoji}</span>
+                  <h2 style={{
+                    fontFamily: "'Fredoka One', cursive",
+                    color: C.accent, fontSize: 22, lineHeight: 1,
+                  }}>
+                    {section.name}
+                  </h2>
+                  {isMonte && (
+                    <span style={{
+                      backgroundColor: `${C.accent}20`,
+                      color: C.accent,
+                      border: `1px solid ${C.accent}50`,
+                      borderRadius: 50, padding: '2px 10px',
+                      fontSize: 10, fontWeight: 800, letterSpacing: 0.8,
+                    }}>
+                      INTERATIVO
+                    </span>
+                  )}
+                </div>
+              </div>
+
+              {/* Conteúdo */}
+              {section.type === 'regular' && (
+                <div style={{ padding: '0 14px 16px', display: 'flex', flexDirection: 'column', gap: 10 }}>
+                  {section.products.map(p => (
+                    <ProductCard key={p.id} product={p} onSelect={setSelected} />
+                  ))}
+                </div>
+              )}
+              {section.type === 'monte' && (
+                <MonteSeuSection section={section} onAdd={onAdd} cartHasItems={cartQty > 0} />
+              )}
+            </div>
+          );
+        })}
       </div>
 
       {/* Barra flutuante do carrinho */}
