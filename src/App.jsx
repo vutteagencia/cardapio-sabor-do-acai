@@ -1623,9 +1623,19 @@ export default function App() {
   };
 
   const handleSubmit = (customer) => {
-    const msg     = buildMessage(cart, orderType, address ?? {}, customer, obs);
-    const encoded = encodeURIComponent(msg);
-    window.open(`https://wa.me/${WHATSAPP_NUMBER}?text=${encoded}`, '_blank');
+    const msg = buildMessage(cart, orderType, address ?? {}, customer, obs);
+    // Codifica só os caracteres que quebram a URL; deixa emoji como Unicode direto
+    // para evitar que versões do WhatsApp interpretem mal os bytes %F0%9F...
+    const safeText = msg
+      .replace(/%/g,  '%25')
+      .replace(/&/g,  '%26')
+      .replace(/\+/g, '%2B')
+      .replace(/=/g,  '%3D')
+      .replace(/\?/g, '%3F')
+      .replace(/#/g,  '%23')
+      .replace(/\n/g, '%0A')
+      .replace(/ /g,  '%20');
+    window.open(`https://wa.me/${WHATSAPP_NUMBER}?text=${safeText}`, '_blank');
   };
 
   return (
