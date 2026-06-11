@@ -4,7 +4,7 @@ import { MENU_SECTIONS } from './data.js';
 // ============================================================
 //  CONFIGURAÇÕES EDITÁVEIS
 // ============================================================
-const WHATSAPP_NUMBER   = '5587999999999';          // Número com código do país (sem + ou espaços)
+const WHATSAPP_NUMBER   = '558791993132';          // Número com código do país (sem + ou espaços)
 const DELIVERY_FEE_NOTE = 'Taxa de entrega a calcular pelo entregador';
 
 // ============================================================
